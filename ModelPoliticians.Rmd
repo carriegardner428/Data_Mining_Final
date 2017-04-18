@@ -218,30 +218,30 @@ kable(pca.eval.svmlinear)
 Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
 ```{r }
 # Load 3 Top Models
-model1 = open("usermodel1.rds")
-model2 = open("usermodel2.rds")
-model3 = open("usermodel3.rds")
-```
-
-## Model 1 Evaluation
-```{r }
-y_predictions = model.predict(document_term_matrix, model1)
-model1.eval   = model.evaluate(y_predictions, y)
-model1.eval
-```
-
-## Model 2 Evaluation
-```{r }
-y_predictions = model.predict(document_term_matrix, model2)
-model2.eval   = model.evaluate(y_predictions, y)
-model2.eval
-
-```
-
-## Model 3 Evaluation
-```{r }
-y_predictions = model.predict(document_term_matrix, model3)
-model3.eval   = model.evaluate(y_predictions, y)
-model3.eval
+# model1 = open("usermodel1.rds")
+# model2 = open("usermodel2.rds")
+# model3 = open("usermodel3.rds")
+# ```
+# 
+# ## Model 1 Evaluation
+# ```{r }
+# y_predictions = model.predict(document_term_matrix, model1)
+# model1.eval   = model.evaluate(y_predictions, y)
+# model1.eval
+# ```
+# 
+# ## Model 2 Evaluation
+# ```{r }
+# y_predictions = model.predict(document_term_matrix, model2)
+# model2.eval   = model.evaluate(y_predictions, y)
+# model2.eval
+# 
+# ```
+# 
+# ## Model 3 Evaluation
+# ```{r }
+# y_predictions = model.predict(document_term_matrix, model3)
+# model3.eval   = model.evaluate(y_predictions, y)
+# model3.eval
 ```
 
