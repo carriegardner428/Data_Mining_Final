@@ -211,16 +211,14 @@ kable(pca.eval.svmlinear)
 ##### Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)
 ```{r }
 # Get models based of of mean F1 score
-dim(document_term_matrix)
-length(y)
 model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
 model2 = model.fit(as.matrix(document_term_matrix), y, 'svmlinear')
 model3 = model.fit(pca.eval.svmlinear, y, 'svmlinear')
 
 # Save Models as usermodelX.rda
 save(model1, file="polimodel1.rda")
-save(model2, file="polimodel2.rds")
-save(model3, file="polimodel3.rds")
+save(model2, file="polimodel2.rda")
+save(model3, file="polimodel3.rda")
 ```
 
 
