@@ -157,7 +157,7 @@ dim(dtm.pca)
 
 # Build Model on Politician's Data
 ## Run Cross Validation
-#### Features: Standard DTM, TFIDF DTM, LSA DTM, PCA DTM, and MDS DTM
+#### Features: Standard DTM, TFIDF DTM, LSA DTM, and PCA DTM
 #### Classifiers: Naive Bayes, SVM-Radial Kernel, SVM-Linear Kernel
 
 ## Standard Document Term Matrix
