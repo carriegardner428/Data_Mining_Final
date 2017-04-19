@@ -243,8 +243,10 @@ crossValidate &lt;- function(document_term_matrix, y, classifier, k.fold=3) {
   return(eval)
 }</code></pre>
 </div>
-<div id="load-data-create-dtms-need-to-find-intersection-between-user-politician-terms" class="section level2">
-<h2>Load Data &amp; Create DTMs –&gt; Need to find intersection between User &amp; Politician Terms</h2>
+<div id="load-data-create-dtms" class="section level2">
+<h2>Load Data &amp; Create DTMs</h2>
+<div id="need-to-find-intersection-between-user-politician-terms" class="section level4">
+<h4>–&gt; Need to find intersection between User &amp; Politician Terms</h4>
 <pre class="r"><code>poli.tweets = load.data.politicians()
 user.tweets = load.data.DR()
 
@@ -259,7 +261,11 @@ document_term_matrix = DocumentTermMatrix(poli.corpus, control = list(dictionary
 # 18 rows, 9137 cols (terms used), (11897 w/user dtm dictionary)
 y = poli.tweets$party # 18
 
-dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf, dictionary=Terms(user.document_term_matrix))) # no empty rows</code></pre>
+dim(user.document_term_matrix)</code></pre>
+<pre><code>## [1]  1264 11897</code></pre>
+<pre class="r"><code>dim(document_term_matrix)</code></pre>
+<pre><code>## [1]    18 11897</code></pre>
+<pre class="r"><code>dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf, dictionary=Terms(user.document_term_matrix))) # no empty rows</code></pre>
 <pre><code>## Warning in weighting(x): unreferenced term(s): won zones americansjust
 ## analysis attributing bankruptcies busin…rt busin…trump casino cells city
 ## considers deba…trump decline directed ended english exempt existed fill
@@ -384,6 +390,7 @@ dim(dtm.lsa.10)</code></pre>
 <pre><code>## [1] 18 10</code></pre>
 <pre class="r"><code>dim(dtm.pca)</code></pre>
 <pre><code>## [1] 18 18</code></pre>
+</div>
 </div>
 <div id="build-model-on-politicians-twitter-data" class="section level2">
 <h2>Build Model on Politician’s Twitter Data</h2>

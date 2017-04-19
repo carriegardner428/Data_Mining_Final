@@ -45,6 +45,8 @@ do.lsa <- function(dtm.tfidf, ndims=10) {
 do.pca <- function(dtm) {
   pca = prcomp(dtm, scale=FALSE)
   dtm.pca = predict(pca) # 1264, 1264
+  # Limit to 10 components
+  # dtm.pca = dtm.pca[,1:10]
   return(dtm.pca)
 }
 
@@ -142,6 +144,9 @@ row.totals = apply(dtm.tfidf, 1, sum)
 dtm.tfidf = dtm.tfidf[row.totals > 0, ] # 1247 rows 
 y.tfidf   = y[row.totals > 0]
 
+dim(dtm.tfidf)
+length(y.tfidf)
+
 # Get reduced DTMs
 ## PCA and LSA
 dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
@@ -158,18 +163,20 @@ dim(dtm.pca)
 
 ### Standard Document Term Matrix
 ```{r DTM}
+set.seed(1)
 # Standard Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 dtm.eval.nb = crossValidate(document_term_matrix, y, 'nb')
 kable(dtm.eval.nb)        # ~NA
 dtm.eval.svmradial = crossValidate(document_term_matrix, y, 'svmradial')
-kable(dtm.eval.svmradial) # ~82.14%
+kable(dtm.eval.svmradial) # ~82.13%
 dtm.eval.svmlinear = crossValidate(document_term_matrix, y, 'svmlinear')
-kable(dtm.eval.svmlinear) # ~73%
+kable(dtm.eval.svmlinear) # ~74.67%
 ```
 
 ### TFIDF Document Term Matrix
 ```{r TFIDF}
+set.seed(1)
 # TFIDF Weighted Document Term Matrix, use y.tfidf
 ### Classifiers - NB, SVMRadial, SVMLinear
 tfidf.eval.nb = crossValidate(dtm.tfidf, y.tfidf, 'nb')
@@ -177,11 +184,12 @@ kable(tfidf.eval.nb)        # ~11.92%
 tfidf.eval.svmradial = crossValidate(dtm.tfidf, y.tfidf, 'svmradial')
 kable(tfidf.eval.svmradial) # ~82.08
 tfidf.eval.svmlinear = crossValidate(dtm.tfidf, y.tfidf, 'svmlinear')
-kable(tfidf.eval.svmlinear) # ~81.56
+kable(tfidf.eval.svmlinear) # ~80.99
 ```
 
 ### LSA DTM
 ```{r LSA}
+set.seed(1)
 # LSA Document Term Matrix w/10 features, use y.tfidf
 lsa.eval.nb = crossValidate(dtm.lsa.10, y.tfidf, 'nb')
 kable(lsa.eval.nb)        # ~NA
@@ -193,6 +201,7 @@ kable(lsa.eval.svmlinear) # ~82.08%
 
 ### PCA DTM
 ```{r PCA}
+set.seed(1)
 # PCA Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 pca.eval.nb = crossValidate(dtm.pca, y, 'nb')
@@ -204,12 +213,14 @@ kable(pca.eval.svmlinear) # ~73.67%
 ```
 
 ## Save 3 Top Models
-##### Top Models: dtm.eval.svmradial (82.14%), pca.eval.svmradial (82.10%), lsa.eval.svmlinear (82.08%)
+##### Top Models: dtm.eval.svmradial (82.14%), lsa.eval.svmlinear (82.08%), tfidf.eval.svmradial (82.07%)
 ```{r }
+set.seed(1)
 # Get models based of of mean F1 score
 model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
-model2 = model.fit(dtm.pca, y, 'svmradial')
-model3 = model.fit(dtm.lsa.10, y.tfidf, 'svmlinear')
+model2 = model.fit(dtm.lsa.10, y.tfidf, 'svmlinear')
+model3 = model.fit(dtm.tfidf, y.tfidf, 'svmradial')
+
 
 # Save Models as usermodelX.rds
 saveRDS(model1, "./usermodel1.rds")

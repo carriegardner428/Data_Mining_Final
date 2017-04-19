@@ -246,7 +246,11 @@ row.totals = apply(dtm.tfidf, 1, sum)
 dtm.tfidf = dtm.tfidf[row.totals &gt; 0, ] # 1247 rows 
 y.tfidf   = y[row.totals &gt; 0]
 
-# Get reduced DTMs
+dim(dtm.tfidf)</code></pre>
+<pre><code>## [1]  1247 11897</code></pre>
+<pre class="r"><code>length(y.tfidf)</code></pre>
+<pre><code>## [1] 1247</code></pre>
+<pre class="r"><code># Get reduced DTMs
 ## PCA and LSA
 dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
 dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
@@ -266,7 +270,8 @@ dim(dtm.lsa.10)</code></pre>
 </div>
 <div id="standard-document-term-matrix" class="section level3">
 <h3>Standard Document Term Matrix</h3>
-<pre class="r"><code># Standard Document Term Matrix
+<pre class="r"><code>set.seed(1)
+# Standard Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 dtm.eval.nb = crossValidate(document_term_matrix, y, 'nb')
 kable(dtm.eval.nb)        # ~NA</code></pre>
@@ -305,7 +310,7 @@ kable(dtm.eval.nb)        # ~NA</code></pre>
 </tbody>
 </table>
 <pre class="r"><code>dtm.eval.svmradial = crossValidate(document_term_matrix, y, 'svmradial')
-kable(dtm.eval.svmradial) # ~82.14%</code></pre>
+kable(dtm.eval.svmradial) # ~82.13%</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -319,10 +324,10 @@ kable(dtm.eval.svmradial) # ~82.14%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.6935867</td>
-<td align="right">0.6872038</td>
-<td align="right">0.7102138</td>
-<td align="right">0.6970014</td>
+<td align="right">0.7030879</td>
+<td align="right">0.6706161</td>
+<td align="right">0.7173397</td>
+<td align="right">0.6970146</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
@@ -333,15 +338,15 @@ kable(dtm.eval.svmradial) # ~82.14%</code></pre>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8190743</td>
-<td align="right">0.8146067</td>
-<td align="right">0.8305556</td>
-<td align="right">0.8214122</td>
+<td align="right">0.8256625</td>
+<td align="right">0.8028369</td>
+<td align="right">0.8354080</td>
+<td align="right">0.8213025</td>
 </tr>
 </tbody>
 </table>
 <pre class="r"><code>dtm.eval.svmlinear = crossValidate(document_term_matrix, y, 'svmlinear')
-kable(dtm.eval.svmlinear) # ~73%</code></pre>
+kable(dtm.eval.svmlinear) # ~74.67%</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -355,31 +360,32 @@ kable(dtm.eval.svmlinear) # ~73%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.7084639</td>
-<td align="right">0.7163743</td>
-<td align="right">0.7120253</td>
-<td align="right">0.7122878</td>
+<td align="right">0.7437500</td>
+<td align="right">0.7006369</td>
+<td align="right">0.7000000</td>
+<td align="right">0.7147956</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.7558528</td>
-<td align="right">0.8506944</td>
-<td align="right">0.7653061</td>
-<td align="right">0.7906178</td>
+<td align="right">0.7854785</td>
+<td align="right">0.7560137</td>
+<td align="right">0.8048780</td>
+<td align="right">0.7821234</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.7313916</td>
-<td align="right">0.7777778</td>
-<td align="right">0.7377049</td>
-<td align="right">0.7489581</td>
+<td align="right">0.7640449</td>
+<td align="right">0.7272727</td>
+<td align="right">0.7487844</td>
+<td align="right">0.7467007</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="tfidf-document-term-matrix" class="section level3">
 <h3>TFIDF Document Term Matrix</h3>
-<pre class="r"><code># TFIDF Weighted Document Term Matrix, use y.tfidf
+<pre class="r"><code>set.seed(1)
+# TFIDF Weighted Document Term Matrix, use y.tfidf
 ### Classifiers - NB, SVMRadial, SVMLinear
 tfidf.eval.nb = crossValidate(dtm.tfidf, y.tfidf, 'nb')
 kable(tfidf.eval.nb)        # ~11.92%</code></pre>
@@ -396,24 +402,24 @@ kable(tfidf.eval.nb)        # ~11.92%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.8666667</td>
-<td align="right">0.9333333</td>
-<td align="right">0.7777778</td>
-<td align="right">0.8592593</td>
+<td align="right">0.8571429</td>
+<td align="right">0.7142857</td>
+<td align="right">0.9666667</td>
+<td align="right">0.8460317</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.0443686</td>
-<td align="right">0.0942761</td>
-<td align="right">0.0503597</td>
-<td align="right">0.0630015</td>
+<td align="right">0.0618557</td>
+<td align="right">0.0344828</td>
+<td align="right">0.1010453</td>
+<td align="right">0.0657946</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.0844156</td>
-<td align="right">0.1712538</td>
-<td align="right">0.0945946</td>
-<td align="right">0.1167547</td>
+<td align="right">0.1153846</td>
+<td align="right">0.0657895</td>
+<td align="right">0.1829653</td>
+<td align="right">0.1213798</td>
 </tr>
 </tbody>
 </table>
@@ -432,10 +438,10 @@ kable(tfidf.eval.svmradial) # ~82.08</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.6867470</td>
-<td align="right">0.7211538</td>
-<td align="right">0.6802885</td>
-<td align="right">0.6960631</td>
+<td align="right">0.6819277</td>
+<td align="right">0.6947115</td>
+<td align="right">0.7115385</td>
+<td align="right">0.6960592</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
@@ -446,10 +452,10 @@ kable(tfidf.eval.svmradial) # ~82.08</code></pre>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8142857</td>
-<td align="right">0.8379888</td>
-<td align="right">0.8097282</td>
-<td align="right">0.8206676</td>
+<td align="right">0.8108883</td>
+<td align="right">0.8198582</td>
+<td align="right">0.8314607</td>
+<td align="right">0.8207357</td>
 </tr>
 </tbody>
 </table>
@@ -468,31 +474,32 @@ kable(tfidf.eval.svmlinear) # ~81.56</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.7012658</td>
-<td align="right">0.7326478</td>
-<td align="right">0.6608040</td>
-<td align="right">0.6982392</td>
+<td align="right">0.7045455</td>
+<td align="right">0.7179487</td>
+<td align="right">0.6870229</td>
+<td align="right">0.7031724</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.9486301</td>
-<td align="right">0.9531773</td>
-<td align="right">0.9494585</td>
-<td align="right">0.9504220</td>
+<td align="right">0.9687500</td>
+<td align="right">0.9556314</td>
+<td align="right">0.9407666</td>
+<td align="right">0.9550493</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8064047</td>
-<td align="right">0.8284884</td>
-<td align="right">0.7792593</td>
-<td align="right">0.8047174</td>
+<td align="right">0.8157895</td>
+<td align="right">0.8199122</td>
+<td align="right">0.7941176</td>
+<td align="right">0.8099398</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="lsa-dtm" class="section level3">
 <h3>LSA DTM</h3>
-<pre class="r"><code># LSA Document Term Matrix w/10 features, use y.tfidf
+<pre class="r"><code>set.seed(1)
+# LSA Document Term Matrix w/10 features, use y.tfidf
 lsa.eval.nb = crossValidate(dtm.lsa.10, y.tfidf, 'nb')
 kable(lsa.eval.nb)        # ~NA</code></pre>
 <table>
@@ -508,24 +515,24 @@ kable(lsa.eval.nb)        # ~NA</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
+<td align="right">NaN</td>
 <td align="right">0.5000000</td>
-<td align="right">0.5000000</td>
-<td align="right">0.7325301</td>
-<td align="right">0.5775100</td>
+<td align="right">0.6891566</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.0036630</td>
+<td align="right">0</td>
 <td align="right">0.0034483</td>
-<td align="right">0.9967213</td>
-<td align="right">0.3346109</td>
+<td align="right">0.9965157</td>
+<td align="right">0.3333213</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.0072727</td>
+<td align="right">NaN</td>
 <td align="right">0.0068493</td>
-<td align="right">0.8444444</td>
-<td align="right">0.2861888</td>
+<td align="right">0.8148148</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -544,10 +551,10 @@ kable(lsa.eval.svmradial) # ~82.07%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.7204819</td>
+<td align="right">0.6819277</td>
 <td align="right">0.6947115</td>
-<td align="right">0.6730769</td>
-<td align="right">0.6960901</td>
+<td align="right">0.7115385</td>
+<td align="right">0.6960592</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
@@ -558,10 +565,10 @@ kable(lsa.eval.svmradial) # ~82.07%</code></pre>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8375350</td>
+<td align="right">0.8108883</td>
 <td align="right">0.8198582</td>
-<td align="right">0.8045977</td>
-<td align="right">0.8206636</td>
+<td align="right">0.8314607</td>
+<td align="right">0.8207357</td>
 </tr>
 </tbody>
 </table>
@@ -580,10 +587,10 @@ kable(lsa.eval.svmlinear) # ~82.08%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.6987952</td>
-<td align="right">0.6923077</td>
-<td align="right">0.6971154</td>
-<td align="right">0.6960728</td>
+<td align="right">0.6939759</td>
+<td align="right">0.7043269</td>
+<td align="right">0.6899038</td>
+<td align="right">0.6960689</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
@@ -594,17 +601,18 @@ kable(lsa.eval.svmlinear) # ~82.08%</code></pre>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8226950</td>
-<td align="right">0.8181818</td>
-<td align="right">0.8215297</td>
-<td align="right">0.8208022</td>
+<td align="right">0.8193457</td>
+<td align="right">0.8265162</td>
+<td align="right">0.8165007</td>
+<td align="right">0.8207875</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="pca-dtm" class="section level3">
 <h3>PCA DTM</h3>
-<pre class="r"><code># PCA Document Term Matrix
+<pre class="r"><code>set.seed(1)
+# PCA Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 pca.eval.nb = crossValidate(dtm.pca, y, 'nb')
 kable(pca.eval.nb)        # ~51.22%</code></pre>
@@ -621,24 +629,24 @@ kable(pca.eval.nb)        # ~51.22%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.7500000</td>
-<td align="right">0.7660819</td>
-<td align="right">0.7315789</td>
-<td align="right">0.7492203</td>
+<td align="right">0.7938931</td>
+<td align="right">0.7214612</td>
+<td align="right">0.7284483</td>
+<td align="right">0.7479342</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.4000000</td>
-<td align="right">0.4517241</td>
-<td align="right">0.4776632</td>
-<td align="right">0.4431291</td>
+<td align="right">0.3661972</td>
+<td align="right">0.5319865</td>
+<td align="right">0.5633333</td>
+<td align="right">0.4871723</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.5217391</td>
-<td align="right">0.5683297</td>
-<td align="right">0.5779626</td>
-<td align="right">0.5560105</td>
+<td align="right">0.5012048</td>
+<td align="right">0.6124031</td>
+<td align="right">0.6353383</td>
+<td align="right">0.5829821</td>
 </tr>
 </tbody>
 </table>
@@ -657,10 +665,10 @@ kable(pca.eval.svmradial) # ~82.10%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.7102138</td>
-<td align="right">0.7085308</td>
-<td align="right">0.6722090</td>
-<td align="right">0.6969845</td>
+<td align="right">0.7030879</td>
+<td align="right">0.6706161</td>
+<td align="right">0.7173397</td>
+<td align="right">0.6970146</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
@@ -671,10 +679,10 @@ kable(pca.eval.svmradial) # ~82.10%</code></pre>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8305556</td>
-<td align="right">0.8294036</td>
-<td align="right">0.8039773</td>
-<td align="right">0.8213121</td>
+<td align="right">0.8256625</td>
+<td align="right">0.8028369</td>
+<td align="right">0.8354080</td>
+<td align="right">0.8213025</td>
 </tr>
 </tbody>
 </table>
@@ -693,24 +701,24 @@ kable(pca.eval.svmlinear) # ~73.67%</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.7182663</td>
-<td align="right">0.6974522</td>
-<td align="right">0.7308869</td>
-<td align="right">0.7155351</td>
+<td align="right">0.7437500</td>
+<td align="right">0.7006369</td>
+<td align="right">0.7000000</td>
+<td align="right">0.7147956</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.7918089</td>
-<td align="right">0.7577855</td>
-<td align="right">0.7993311</td>
-<td align="right">0.7829751</td>
+<td align="right">0.7854785</td>
+<td align="right">0.7560137</td>
+<td align="right">0.8048780</td>
+<td align="right">0.7821234</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.7532468</td>
-<td align="right">0.7263682</td>
-<td align="right">0.7635783</td>
-<td align="right">0.7477311</td>
+<td align="right">0.7640449</td>
+<td align="right">0.7272727</td>
+<td align="right">0.7487844</td>
+<td align="right">0.7467007</td>
 </tr>
 </tbody>
 </table>
@@ -718,12 +726,14 @@ kable(pca.eval.svmlinear) # ~73.67%</code></pre>
 </div>
 <div id="save-3-top-models" class="section level2">
 <h2>Save 3 Top Models</h2>
-<div id="top-models-dtm.eval.svmradial-82.14-pca.eval.svmradial-82.10-lsa.eval.svmlinear-82.08" class="section level5">
-<h5>Top Models: dtm.eval.svmradial (82.14%), pca.eval.svmradial (82.10%), lsa.eval.svmlinear (82.08%)</h5>
-<pre class="r"><code># Get models based of of mean F1 score
+<div id="top-models-dtm.eval.svmradial-82.14-lsa.eval.svmlinear-82.08-tfidf.eval.svmradial-82" class="section level5">
+<h5>Top Models: dtm.eval.svmradial (82.14%), lsa.eval.svmlinear (82.08%), tfidf.eval.svmradial (82%)</h5>
+<pre class="r"><code>set.seed(1)
+# Get models based of of mean F1 score
 model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
-model2 = model.fit(dtm.pca, y, 'svmradial')
-model3 = model.fit(dtm.lsa.10, y.tfidf, 'svmlinear')
+model2 = model.fit(dtm.lsa.10, y.tfidf, 'svmlinear')
+model3 = model.fit(dtm.pca, y, 'svmradial')
+
 
 # Save Models as usermodelX.rds
 saveRDS(model1, &quot;./usermodel1.rds&quot;)

@@ -141,7 +141,8 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
-## Load Data & Create DTMs --> Need to find intersection between User & Politician Terms
+## Load Data & Create DTMs 
+#### --> Need to find intersection between User & Politician Terms
 ```{r message=FALSE}
 poli.tweets = load.data.politicians()
 user.tweets = load.data.DR()
@@ -156,6 +157,9 @@ user.document_term_matrix = DocumentTermMatrix(user.corpus)
 document_term_matrix = DocumentTermMatrix(poli.corpus, control = list(dictionary=Terms(user.document_term_matrix))) 
 # 18 rows, 9137 cols (terms used), (11897 w/user dtm dictionary)
 y = poli.tweets$party # 18
+
+dim(user.document_term_matrix)
+dim(document_term_matrix)
 
 dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf, dictionary=Terms(user.document_term_matrix))) # no empty rows
 y.tfidf = poli.tweets$party

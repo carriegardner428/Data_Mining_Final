@@ -36,6 +36,24 @@ load.data.politicians <- function() {
   return(tweets)
 }
 
+load.data.DR <- function() {
+  # preprocessed in python
+  tweets = read.csv('DR_users.csv') # data is preprocessed in python
+  tweets = tweets[,-1]
+  tweets[1:3,]
+  table(tweets$party) # D:881, R:383
+  
+  tweets$text = as.character(tweets$text)
+  tweets$state_code = as.character(tweets$state_code)
+  
+  # Recode Dems = 0, Reps = 1
+  tweets$party = revalue(tweets$party, c("D"=0, "R"=1))
+  any(is.na(tweets$party))
+
+  tweets[1:3,]
+  return(tweets)
+}
+
 do.lsa <- function(dtm.tfidf, ndims=10) {
   S = svd(dtm.tfidf, nu = ndims, nv = ndims)
   dtm.lsa = S$u
@@ -132,29 +150,39 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 ```
 
 ### Load Data
-#### Load Data & Create DTMs  
-##### Since the 3 top user models feature sets: document_term_matrix, dtm.pca, dtm.lsa.10
+##### --> Need to find intersection between User & Politician Terms
+##### Top 3 Feature Sets used in User Models: document_term_matrix, pca, & lsa (recreate feature sets w/politician's data)
 ```{r Load}
 poli.tweets = load.data.politicians()
+user.tweets = load.data.DR()
 
 # Get corpus
 poli.corpus = Corpus(VectorSource(poli.tweets$text))
+user.corpus = Corpus(VectorSource(user.tweets$text))
 
-# Get DTM & y, and TFIDF Dtm & y.tfidf
-document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
+user.document_term_matrix = DocumentTermMatrix(user.corpus)
+# Get DTM & y, and TFIDF Dtm & y.tfidf using user.corpus as a dictionary 
+## http://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data
+document_term_matrix = DocumentTermMatrix(poli.corpus, control = list(dictionary=Terms(user.document_term_matrix))) 
+# 18 rows, 9137 cols (terms used), (11897 w/user dtm dictionary)
 y = poli.tweets$party # 18
 
-dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
+dim(user.document_term_matrix)
+dim(document_term_matrix)
+
+dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf, dictionary=Terms(user.document_term_matrix))) # no empty rows
 y.tfidf = poli.tweets$party
 
-# Get reduced DTMs
-## PCA, LSA, MDS
+# Get PCA and LSA
 dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
 dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
+
+dim(dtm.lsa.10) # 18, 10
+dim(dtm.pca)    # 
 ```
 
 ### Load Models  
-#### 3 Top Models: 
+#### 3 Top Models: dtm.eval.svmradial (82.14%), pca.eval.svmradial (82.10%), lsa.eval.svmlinear (82.08%)
 Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
 ```{r }
 # Load 3 Top Models
@@ -165,6 +193,7 @@ model3.user = readRDS("./usermodel3.rds")
 
 ### Model 1 Evaluation
 ```{r }
+set.seed(1)
 y_predictions = model.predict(as.matrix(document_term_matrix), model1.user)
 model1.user.eval = model.evaluate(y_predictions, y)
 model1.user.eval
