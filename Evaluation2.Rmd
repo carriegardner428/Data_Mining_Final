@@ -1,0 +1,190 @@
+---
+title: "Politician Model Evaluation"
+date: "4/18/2017"
+output: html_document
+---
+## Test Model from User Data on Politician's Data
+```{r setup, include=FALSE}
+library(plyr)     # for recoding data
+library(NLP)      # for NLP
+library(tm)       # for Corpus()
+library(e1071)    # svm
+library(rpart)    # decision trees
+library(ada)      # for adaboost
+library(lsa)      # LSA
+library(Matrix)   # for SVM matricies
+library(SparseM)  # for SVM matricies
+library(caret)    # for Precision, Recall()
+library(knitr)    # for kable
+```
+
+### Helper Functions
+```{r Helper}
+load.data.politicians <- function() {
+  # preprocessed in python
+  tweets = read.csv('tweets_by_politicians.csv') # data is preprocessed in python
+  tweets = tweets[,-1]
+  tweets[1:3,]
+  table(tweets$party) # D:9, R:9
+  
+  tweets$text = as.character(tweets$text)
+  
+  # Recode Dems = 0, Reps = 1
+  tweets$party = revalue(tweets$party, c("D"=0, "R"=1))
+
+  tweets[1:3,]
+  return(tweets)
+}
+
+do.lsa <- function(dtm.tfidf, ndims=10) {
+  S = svd(dtm.tfidf, nu = ndims, nv = ndims)
+  dtm.lsa = S$u
+  return(dtm.lsa)
+}
+
+do.pca <- function(dtm) {
+  pca = prcomp(dtm, scale=FALSE)
+  dtm.pca = predict(pca) # 1264, 1264
+  return(dtm.pca)
+}
+
+# Return reusable model of training data
+model.fit <- function(X_train, y_train, classifier) {
+   switch(classifier, 
+        nb = {
+          model = naiveBayes(x=X_train, y=y_train)
+          # y_predictions = predict(model, newdata=X_test)
+         },
+        lib = {
+          X_train = as.matrix.csr(X_train)  # 1,244
+          model = LiblineaR(X_train, y_train)
+          X_test2 = as.matrix.csr(X_test)
+          y_predictions = predict(model, newx=X_test2)
+        },
+        svmradial = {
+          X_train = as.matrix.csr(X_train)  # 1,244
+          # X_test  = as.matrix.csr(X_test)    # 622
+          model = svm(X_train, y_train, kernel="radial")
+          # y_predictions = predict(model, newdata=X_test)
+        },
+        svmlinear = {
+          X_train = as.matrix.csr(X_train)  # 1,244
+          # X_test  = as.matrix.csr(X_test)    # 622
+          model = svm(X_train, y_train, kernel="linear")
+          # y_predictions = predict(model, newdata=X_test)
+        }
+   )
+  return(model)
+}
+
+# Return predictions of y_test
+model.predict <- function(X_test, model) {
+  # X_test = as.data.frame(X_test)
+  y_predictions = predict(model, newdata=X_test)
+  # if probabilties
+  ## probs = predict(model, newdata=X_test)
+  ## y_predictions = as.numeric(probs > .50)
+  return(y_predictions)
+}
+
+# Find Precision, Recall, and F Score
+model.evaluate <- function(y_predictions, y_test) {
+  Precision = posPredValue(y_predictions, y_test)
+  Recall    = sensitivity(y_predictions, y_test)
+  F1 = (2 * Precision * Recall) / (Precision + Recall)
+
+  # bind values together
+  col = rbind(Precision, Recall, F1)
+  return(col)
+}
+
+# Cross Validate
+crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
+  eval = matrix(, nrow = 3, ncol = 0) # empty matrix with 3 rows
+  n.obs = nrow(document_term_matrix) # no. of observations 
+  s = sample(n.obs)
+  # k = 1
+  # k.fold = 3
+  for (k in 1:k.fold) {
+    test.idx = which(s %% k.fold == (k-1) ) # use modular operator
+    X_train = as.matrix(document_term_matrix[-test.idx,])  # 1,244
+    X_test  = as.matrix(document_term_matrix[test.idx,])    # 622
+    y_train = y[-test.idx]                      # 1,244
+    y_test  = y[test.idx]                        # 622
+    # model 
+    model = model.fit(X_train, y_train, classifier)
+    y_predictions = model.predict(X_test, model)
+    # evaluate predictions -- obtain precision, recall, F1 score
+    k.eval = model.evaluate(y_predictions, y_test)
+    eval = cbind(eval, k.eval)
+  }
+  
+  # return table of K fold precision, recall, fscore 
+  colnames(eval) = c("Fold 1", "Fold 2", "Fold 3")
+  eval
+  means = rowMeans(eval)
+  eval = cbind(eval, Mean=means)
+  eval
+    
+  return(eval)
+}
+
+```
+
+### Load Data
+#### Load Data & Create DTMs  
+##### Since the 3 top user models feature sets: document_term_matrix, dtm.pca, dtm.lsa.10
+```{r Load}
+poli.tweets = load.data.politicians()
+
+# Get corpus
+poli.corpus = Corpus(VectorSource(poli.tweets$text))
+
+# Get DTM & y, and TFIDF Dtm & y.tfidf
+document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
+y = poli.tweets$party # 18
+
+dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
+y.tfidf = poli.tweets$party
+
+# Get reduced DTMs
+## PCA, LSA, MDS
+dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
+dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
+```
+
+### Load Models  
+#### 3 Top Models: 
+Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
+```{r }
+# Load 3 Top Models
+model1.user = readRDS("./usermodel1.rds")
+model2.user = readRDS("./usermodel2.rds")
+model3.user = readRDS("./usermodel3.rds")
+```
+
+### Model 1 Evaluation
+```{r }
+y_predictions = model.predict(as.matrix(document_term_matrix), model1.user)
+model1.user.eval = model.evaluate(y_predictions, y)
+model1.user.eval
+
+```
+
+### Model 2 Evaluation
+```{r }
+y_predictions = model.predict(dtm.pca, model2.user)
+model2.user.eval = model.evaluate(y_predictions, y)
+model2.user.eval
+
+```
+
+### Model 3 Evaluation
+```{r }
+y_predictions = model.predict(dtm.lsa.10, model3.user)
+model3.user.eval = model.evaluate(y_predictions, y)
+model3.user.eval
+```
+
+## Including Plots
+### Let's graph results!
