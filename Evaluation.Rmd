@@ -1,12 +1,9 @@
 ---
-title: "Eval"
-author: "Carrie Gardner"
+title: "User Model Evaluation"
 date: "4/18/2017"
 output: html_document
 ---
-
-
-# Test Model from User Data on Politician's Data
+## Test Model from User Data on Politician's Data
 ```{r setup, include=FALSE}
 library(plyr)     # for recoding data
 library(NLP)      # for NLP
@@ -21,7 +18,7 @@ library(caret)    # for Precision, Recall()
 library(knitr)    # for kable
 ```
 
-## Helper Functions
+### Helper Functions
 ```{r Helper}
 load.data.politicians <- function() {
   # preprocessed in python
@@ -134,8 +131,9 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
-## Load Data
-# Load Data & Create DTMs  ### ONLY CREATE THE DTMs THAT ARE NECESSARY FOR EVALUATION --> CHECK WHICH WERE USED TO CREATE TOP 3 MODELS
+### Load Data
+#### Load Data & Create DTMs  
+##### Since the 3 top user models feature sets: document_term_matrix, dtm.pca, dtm.lsa.10
 ```{r Load}
 poli.tweets = load.data.politicians()
 
@@ -153,13 +151,9 @@ y.tfidf = poli.tweets$party
 ## PCA, LSA, MDS
 dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
 dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
-
-dim(dtm.lsa.10)
-dim(document_term_matrix)
-    
 ```
 
-## Load Models.  
+### Load Models  
 #### 3 Top Models: 
 Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
 ```{r }
@@ -169,24 +163,25 @@ model2.user = readRDS("./usermodel2.rds")
 model3.user = readRDS("./usermodel3.rds")
 ```
 
-## Model 1 Evaluation
+### Model 1 Evaluation
 ```{r }
-y_predictions = model.predict(as.matrix(document_term_matrix), model1)
+y_predictions = model.predict(as.matrix(document_term_matrix), model1.user)
 model1.user.eval = model.evaluate(y_predictions, y)
 model1.user.eval
+
 ```
 
-## Model 2 Evaluation
+### Model 2 Evaluation
 ```{r }
-y_predictions = model.predict(document_term_matrix, model2.user)
+y_predictions = model.predict(dtm.pca, model2.user)
 model2.user.eval = model.evaluate(y_predictions, y)
 model2.user.eval
 
 ```
 
-## Model 3 Evaluation
+### Model 3 Evaluation
 ```{r }
-y_predictions = model.predict(document_term_matrix, model3.user)
+y_predictions = model.predict(dtm.lsa.10, model3.user)
 model3.user.eval = model.evaluate(y_predictions, y)
 model3.user.eval
 ```
