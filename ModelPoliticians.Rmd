@@ -219,6 +219,11 @@ model3 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
 save(model1, file="polimodel1.rda")
 save(model2, file="polimodel2.rda")
 save(model3, file="polimodel3.rda")
+
+## Save with 
+saveRDS(model1, "./polimodel1.rds")
+saveRDS(model2, "./polimodel2.rds")
+saveRDS(model3, "./polimodel3.rds")
 ```
 
 

@@ -155,7 +155,7 @@ dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
 dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
 
 dim(dtm.lsa.10)
-dim(dtm)
+dim(document_term_matrix)
     
 ```
 
@@ -164,14 +164,14 @@ dim(dtm)
 Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
 ```{r }
 # Load 3 Top Models
-model1.user = load("usermodel1.rda")
-model2.user = load("usermodel2.rda")
-model3.user = load("usermodel3.rda")
+model1.user = readRDS("./usermodel1.rds")
+model2.user = readRDS("./usermodel2.rds")
+model3.user = readRDS("./usermodel3.rds")
 ```
 
 ## Model 1 Evaluation
 ```{r }
-y_predictions = model.predict(document_term_matrix, model1.user) # this may need to be in as.matrix(document_term_matrix)
+y_predictions = model.predict(as.matrix(document_term_matrix), model1)
 model1.user.eval = model.evaluate(y_predictions, y)
 model1.user.eval
 ```
