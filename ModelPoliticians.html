@@ -247,27 +247,21 @@ dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf
 y.tfidf = poli.tweets$party
 
 # Get reduced DTMs
-## PCA, LSA, MDS
+## PCA and LSA
 dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
 dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
-# dtm.mds = do.mds(dtm) 
 
 dim(dtm.lsa.10)</code></pre>
 <pre><code>## [1] 18 10</code></pre>
 <pre class="r"><code>dim(dtm.pca)</code></pre>
 <pre><code>## [1] 18 18</code></pre>
-<pre class="r"><code># dim(dtm.mds)
-
-##################  MDS
-# sortedv1 = dtm.mds[order(V1),]
-# dim(dtm.mds)</code></pre>
 </div>
 <div id="build-model-on-politicians-data" class="section level1">
 <h1>Build Model on Politician’s Data</h1>
 <div id="run-cross-validation" class="section level2">
 <h2>Run Cross Validation</h2>
-<div id="features-standard-dtm-tfidf-dtm-lsa-dtm-pca-dtm-and-mds-dtm" class="section level4">
-<h4>Features: Standard DTM, TFIDF DTM, LSA DTM, PCA DTM, and MDS DTM</h4>
+<div id="features-standard-dtm-tfidf-dtm-lsa-dtm-and-pca-dtm" class="section level4">
+<h4>Features: Standard DTM, TFIDF DTM, LSA DTM, and PCA DTM</h4>
 </div>
 <div id="classifiers-naive-bayes-svm-radial-kernel-svm-linear-kernel" class="section level4">
 <h4>Classifiers: Naive Bayes, SVM-Radial Kernel, SVM-Linear Kernel</h4>
@@ -293,23 +287,23 @@ kable(dtm.eval.nb)</code></pre>
 <tr class="odd">
 <td>Precision</td>
 <td align="right">0.5000000</td>
-<td align="right">0.5000000</td>
-<td align="right">0.5000000</td>
-<td align="right">0.5000000</td>
+<td align="right">0.8333333</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
 <td align="right">1.0000000</td>
 <td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
+<td align="right">0</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
 <td align="right">0.6666667</td>
-<td align="right">0.6666667</td>
-<td align="right">0.6666667</td>
-<td align="right">0.6666667</td>
+<td align="right">0.9090909</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -328,24 +322,24 @@ kable(dtm.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">1.0000000</td>
-<td align="right">1</td>
-<td align="right">0.7500000</td>
-<td align="right">0.9166667</td>
+<td align="right">NaN</td>
+<td align="right">0.1666667</td>
+<td align="right">0.60</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.6666667</td>
-<td align="right">1</td>
+<td align="right">0</td>
 <td align="right">1.0000000</td>
-<td align="right">0.8888889</td>
+<td align="right">1.00</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8000000</td>
-<td align="right">1</td>
-<td align="right">0.8571429</td>
-<td align="right">0.8857143</td>
+<td align="right">NaN</td>
+<td align="right">0.2857143</td>
+<td align="right">0.75</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -364,24 +358,24 @@ kable(dtm.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.4000000</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.8000000</td>
+<td align="right">1.0000000</td>
+<td align="right">0.5000000</td>
+<td align="right">0.5000000</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">0.8000000</td>
 <td align="right">1.0000000</td>
-<td align="right">1</td>
-<td align="right">1</td>
 <td align="right">1.0000000</td>
+<td align="right">0.9333333</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.5714286</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.8571429</td>
+<td align="right">0.8888889</td>
+<td align="right">0.6666667</td>
+<td align="right">0.6666667</td>
+<td align="right">0.7407407</td>
 </tr>
 </tbody>
 </table>
@@ -406,23 +400,23 @@ kable(tfidf.eval.nb)</code></pre>
 <tr class="odd">
 <td>Precision</td>
 <td align="right">1.0000000</td>
-<td align="right">0.60</td>
-<td align="right">1.0000000</td>
-<td align="right">0.8666667</td>
+<td align="right">1</td>
+<td align="right">0.6666667</td>
+<td align="right">0.8888889</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.6666667</td>
-<td align="right">1.00</td>
 <td align="right">0.3333333</td>
+<td align="right">1</td>
+<td align="right">0.6666667</td>
 <td align="right">0.6666667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8000000</td>
-<td align="right">0.75</td>
 <td align="right">0.5000000</td>
-<td align="right">0.6833333</td>
+<td align="right">1</td>
+<td align="right">0.6666667</td>
+<td align="right">0.7222222</td>
 </tr>
 </tbody>
 </table>
@@ -441,24 +435,24 @@ kable(tfidf.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.3333333</td>
-<td align="right">NaN</td>
+<td align="right">1</td>
+<td align="right">0.5000000</td>
 <td align="right">0.60</td>
-<td align="right">NaN</td>
+<td align="right">0.7000000</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">1</td>
 <td align="right">1.0000000</td>
-<td align="right">0</td>
 <td align="right">1.00</td>
-<td align="right">0.6666667</td>
+<td align="right">1.0000000</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.5000000</td>
-<td align="right">NaN</td>
+<td align="right">1</td>
+<td align="right">0.6666667</td>
 <td align="right">0.75</td>
-<td align="right">NaN</td>
+<td align="right">0.8055556</td>
 </tr>
 </tbody>
 </table>
@@ -477,23 +471,23 @@ kable(tfidf.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.1666667</td>
-<td align="right">0.5000000</td>
 <td align="right">NaN</td>
+<td align="right">0.60</td>
+<td align="right">0.3333333</td>
 <td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
 <td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1.0000000</td>
 <td align="right">0.6666667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.2857143</td>
-<td align="right">0.6666667</td>
 <td align="right">NaN</td>
+<td align="right">0.75</td>
+<td align="right">0.5000000</td>
 <td align="right">NaN</td>
 </tr>
 </tbody>
@@ -517,24 +511,24 @@ kable(lsa.eval.nb)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.2500000</td>
-<td align="right">0.75</td>
-<td align="right">0.5000000</td>
-<td align="right">0.5000000</td>
+<td align="right">1.0000000</td>
+<td align="right">0.4000000</td>
+<td align="right">0.4000000</td>
+<td align="right">0.6000000</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
 <td align="right">0.5000000</td>
-<td align="right">0.75</td>
+<td align="right">1.0000000</td>
 <td align="right">0.6666667</td>
-<td align="right">0.6388889</td>
+<td align="right">0.7222222</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.3333333</td>
-<td align="right">0.75</td>
+<td align="right">0.6666667</td>
 <td align="right">0.5714286</td>
-<td align="right">0.5515873</td>
+<td align="right">0.5000000</td>
+<td align="right">0.5793651</td>
 </tr>
 </tbody>
 </table>
@@ -553,23 +547,23 @@ kable(lsa.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.1666667</td>
+<td align="right">0.6666667</td>
 <td align="right">NaN</td>
-<td align="right">NaN</td>
+<td align="right">1.0000000</td>
 <td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">1.0000000</td>
+<td align="right">0.6666667</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.3333333</td>
+<td align="right">0.6666667</td>
+<td align="right">0.4444444</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.2857143</td>
+<td align="right">0.6666667</td>
 <td align="right">NaN</td>
-<td align="right">NaN</td>
+<td align="right">0.8000000</td>
 <td align="right">NaN</td>
 </tr>
 </tbody>
@@ -589,24 +583,24 @@ kable(lsa.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">1.00</td>
-<td align="right">0.3333333</td>
-<td align="right">0.7500000</td>
-<td align="right">0.6944444</td>
+<td align="right">0.6666667</td>
+<td align="right">1.0000000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.25</td>
-<td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">0.7500000</td>
+<td align="right">0.6666667</td>
+<td align="right">0.6666667</td>
+<td align="right">0</td>
+<td align="right">0.4444444</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.40</td>
-<td align="right">0.5000000</td>
-<td align="right">0.8571429</td>
-<td align="right">0.5857143</td>
+<td align="right">0.6666667</td>
+<td align="right">0.8000000</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -630,24 +624,24 @@ kable(pca.eval.nb)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">1.00</td>
-<td align="right">0</td>
+<td align="right">1.0000000</td>
 <td align="right">0.4000000</td>
-<td align="right">0.4666667</td>
+<td align="right">0.5000000</td>
+<td align="right">0.6333333</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.25</td>
-<td align="right">0</td>
+<td align="right">0.2000000</td>
 <td align="right">1.0000000</td>
-<td align="right">0.4166667</td>
+<td align="right">1.0000000</td>
+<td align="right">0.7333333</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.40</td>
-<td align="right">NaN</td>
+<td align="right">0.3333333</td>
 <td align="right">0.5714286</td>
-<td align="right">NaN</td>
+<td align="right">0.6666667</td>
+<td align="right">0.5238095</td>
 </tr>
 </tbody>
 </table>
@@ -666,17 +660,17 @@ kable(pca.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">1.0000000</td>
+<td align="right">0.3333333</td>
 <td align="right">0.3333333</td>
 <td align="right">NaN</td>
 <td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.3333333</td>
+<td align="right">1.0000000</td>
 <td align="right">1.0000000</td>
 <td align="right">0</td>
-<td align="right">0.4444444</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
@@ -702,62 +696,45 @@ kable(pca.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.6666667</td>
-<td align="right">0.7500000</td>
 <td align="right">1</td>
-<td align="right">0.8055556</td>
+<td align="right">0.8000000</td>
+<td align="right">0.6666667</td>
+<td align="right">0.8222222</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.5000000</td>
-<td align="right">1.0000000</td>
 <td align="right">1</td>
-<td align="right">0.8333333</td>
+<td align="right">1.0000000</td>
+<td align="right">1.0000000</td>
+<td align="right">1.0000000</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.5714286</td>
-<td align="right">0.8571429</td>
 <td align="right">1</td>
-<td align="right">0.8095238</td>
+<td align="right">0.8888889</td>
+<td align="right">0.8000000</td>
+<td align="right">0.8962963</td>
 </tr>
 </tbody>
 </table>
 </div>
-</div>
-<div id="test-model-from-user-data-on-politicians-data" class="section level1">
-<h1>Test Model from User Data on Politician’s Data</h1>
-<div id="load-models." class="section level2">
-<h2>Load Models.</h2>
-<div id="top-models" class="section level4">
-<h4>3 Top Models:</h4>
-<p>Use same types of features in evaluation user dtm.tfiid -&gt; politicians dtm.tfidf feature set</p>
-<pre class="r"><code># Load 3 Top Models
-# model1 = open(&quot;usermodel1.rds&quot;)
-# model2 = open(&quot;usermodel2.rds&quot;)
-# model3 = open(&quot;usermodel3.rds&quot;)
-# ```
-# 
-# ## Model 1 Evaluation
-# ```{r }
-# y_predictions = model.predict(document_term_matrix, model1)
-# model1.eval   = model.evaluate(y_predictions, y)
-# model1.eval
-# ```
-# 
-# ## Model 2 Evaluation
-# ```{r }
-# y_predictions = model.predict(document_term_matrix, model2)
-# model2.eval   = model.evaluate(y_predictions, y)
-# model2.eval
-# 
-# ```
-# 
-# ## Model 3 Evaluation
-# ```{r }
-# y_predictions = model.predict(document_term_matrix, model3)
-# model3.eval   = model.evaluate(y_predictions, y)
-# model3.eval</code></pre>
+<div id="save-3-top-models" class="section level2">
+<h2>Save 3 Top Models</h2>
+<div id="top-models-dtm.eval.svmradial-88.57-dtm.eval.svmlinear-85.71-pca.eval.svmlinear-80.95" class="section level5">
+<h5>Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)</h5>
+<pre class="r"><code># Get models based of of mean F1 score
+dim(document_term_matrix)</code></pre>
+<pre><code>## [1]   18 9137</code></pre>
+<pre class="r"><code>length(y)</code></pre>
+<pre><code>## [1] 18</code></pre>
+<pre class="r"><code>model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
+model2 = model.fit(as.matrix(document_term_matrix), y, 'svmlinear')
+model3 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
+
+# Save Models as usermodelX.rda
+save(model1, file=&quot;polimodel1.rda&quot;)
+save(model2, file=&quot;polimodel2.rda&quot;)
+save(model3, file=&quot;polimodel3.rda&quot;)</code></pre>
 </div>
 </div>
 </div>

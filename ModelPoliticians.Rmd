@@ -2,8 +2,6 @@
 title: "Model Politicians"
 output: html_document
 ---
-
-# Model Politicians
 ```{r setup, include=FALSE}
 library(plyr)     # for recoding data
 library(NLP)      # for NLP
@@ -147,7 +145,7 @@ dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf
 y.tfidf = poli.tweets$party
 
 # Get reduced DTMs
-## PCA, LSA, MDS
+## PCA and LSA
 dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
 dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
 
@@ -211,9 +209,11 @@ kable(pca.eval.svmlinear)
 ##### Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)
 ```{r }
 # Get models based of of mean F1 score
+dim(document_term_matrix)
+length(y)
 model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
 model2 = model.fit(as.matrix(document_term_matrix), y, 'svmlinear')
-model3 = model.fit(pca.eval.svmlinear, y, 'svmlinear')
+model3 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
 
 # Save Models as usermodelX.rda
 save(model1, file="polimodel1.rda")
