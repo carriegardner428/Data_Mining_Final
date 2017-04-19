@@ -1,9 +1,12 @@
 ---
-title: "Model Politicians"
+title: "Eval"
+author: "Carrie Gardner"
+date: "4/18/2017"
 output: html_document
 ---
 
-# Model Politicians
+
+# Test Model from User Data on Politician's Data
 ```{r setup, include=FALSE}
 library(plyr)     # for recoding data
 library(NLP)      # for NLP
@@ -18,6 +21,8 @@ library(caret)    # for Precision, Recall()
 library(knitr)    # for kable
 ```
 
+## Helper Functions
+```{r }
 # Helper Functions
 ```{r Helper}
 load.data.politicians <- function() {
@@ -132,97 +137,44 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
-# Load Data & Create DTMs
-```{r Load}
-poli.tweets = load.data.politicians()
-
-# Get corpus
-poli.corpus = Corpus(VectorSource(poli.tweets$text))
-
-# Get DTM & y, and TFIDF Dtm & y.tfidf
-document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
-y = poli.tweets$party # 18
-
-dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
-y.tfidf = poli.tweets$party
-
-# Get reduced DTMs
-## PCA, LSA, MDS
-dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
-dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
-
-dim(dtm.lsa.10)
-dim(dtm.pca)
-```
-
-# Build Model on Politician's Data
-## Run Cross Validation
-#### Features: Standard DTM, TFIDF DTM, LSA DTM, PCA DTM, and MDS DTM
-#### Classifiers: Naive Bayes, SVM-Radial Kernel, SVM-Linear Kernel
-
-## Standard Document Term Matrix
-```{r DTM}
-# Standard Document Term Matrix
-### Classifiers - NB, SVMRadial, SVMLinear
-dtm.eval.nb = crossValidate(document_term_matrix, y, 'nb')
-kable(dtm.eval.nb)
-dtm.eval.svmradial = crossValidate(document_term_matrix, y, 'svmradial')
-kable(dtm.eval.svmradial)
-dtm.eval.svmlinear = crossValidate(document_term_matrix, y, 'svmlinear')
-kable(dtm.eval.svmlinear)
-```
-
-## TFIDF Document Term Matrix
-```{r TFIDF}
-# TFIDF Weighted Document Term Matrix, use y.tfidf
-### Classifiers - NB, SVMRadial, SVMLinear
-tfidf.eval.nb = crossValidate(dtm.tfidf, y.tfidf, 'nb')
-kable(tfidf.eval.nb)
-tfidf.eval.svmradial = crossValidate(dtm.tfidf, y.tfidf, 'svmradial')
-kable(tfidf.eval.svmradial)
-tfidf.eval.svmlinear = crossValidate(dtm.tfidf, y.tfidf, 'svmlinear')
-kable(tfidf.eval.svmlinear)
-```
-
-## LSA DTM
-```{r LSA}
-# LSA Document Term Matrix w/10 features, use y.tfidf
-lsa.eval.nb = crossValidate(dtm.lsa.10, y.tfidf, 'nb')
-kable(lsa.eval.nb)
-lsa.eval.svmradial = crossValidate(dtm.lsa.10, y.tfidf, 'svmradial')
-kable(lsa.eval.svmradial)
-lsa.eval.svmlinear = crossValidate(dtm.lsa.10, y.tfidf, 'svmlinear')
-kable(lsa.eval.svmlinear)
-```
-
-## PCA DTM
-```{r PCA}
-# PCA Document Term Matrix
-### Classifiers - NB, SVMRadial, SVMLinear
-pca.eval.nb = crossValidate(dtm.pca, y, 'nb')
-kable(pca.eval.nb)
-pca.eval.svmradial = crossValidate(dtm.pca, y, 'svmradial')
-kable(pca.eval.svmradial)
-pca.eval.svmlinear = crossValidate(dtm.pca, y, 'svmlinear')
-kable(pca.eval.svmlinear)
-```
-
-## Save 3 Top Models
-##### Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)
+## Load Models.  
+#### 3 Top Models: 
+Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
 ```{r }
-# Get models based of of mean F1 score
-dim(document_term_matrix)
-length(y)
-model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
-model2 = model.fit(as.matrix(document_term_matrix), y, 'svmlinear')
-model3 = model.fit(pca.eval.svmlinear, y, 'svmlinear')
-
-# Save Models as usermodelX.rda
-save(model1, file="polimodel1.rda")
-save(model2, file="polimodel2.rds")
-save(model3, file="polimodel3.rds")
+# Load 3 Top Models
+# model1.user = load("usermodel1.rda")
+# model2.user = load("usermodel2.rda")
+# model3.user = load("usermodel3.rda")
+# ```
+# 
+# ## Model 1 Evaluation
+# ```{r }
+# y_predictions = model.predict(document_term_matrix, model1.user)
+# model1.eval   = model.evaluate(y_predictions, y)
+# model1.eval
+# ```
+# 
+# ## Model 2 Evaluation
+# ```{r }
+# y_predictions = model.predict(document_term_matrix, model2.user)
+# model2.eval   = model.evaluate(y_predictions, y)
+# model2.eval
+# 
+# ```
+# 
+# ## Model 3 Evaluation
+# ```{r }
+# y_predictions = model.predict(document_term_matrix, model3.user)
+# model3.eval   = model.evaluate(y_predictions, y)
+# model3.eval
 ```
 
+## Including Plots
 
+You can also embed plots, for example:
 
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
 
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
