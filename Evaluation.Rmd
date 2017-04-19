@@ -22,8 +22,6 @@ library(knitr)    # for kable
 ```
 
 ## Helper Functions
-```{r }
-# Helper Functions
 ```{r Helper}
 load.data.politicians <- function() {
   # preprocessed in python
@@ -52,7 +50,6 @@ do.pca <- function(dtm) {
   dtm.pca = predict(pca) # 1264, 1264
   return(dtm.pca)
 }
-
 
 # Return reusable model of training data
 model.fit <- function(X_train, y_train, classifier) {
@@ -137,44 +134,62 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
+## Load Data
+# Load Data & Create DTMs  ### ONLY CREATE THE DTMs THAT ARE NECESSARY FOR EVALUATION --> CHECK WHICH WERE USED TO CREATE TOP 3 MODELS
+```{r Load}
+poli.tweets = load.data.politicians()
+
+# Get corpus
+poli.corpus = Corpus(VectorSource(poli.tweets$text))
+
+# Get DTM & y, and TFIDF Dtm & y.tfidf
+document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
+y = poli.tweets$party # 18
+
+dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
+y.tfidf = poli.tweets$party
+
+# Get reduced DTMs
+## PCA, LSA, MDS
+dtm.lsa.10 = do.lsa(dtm.tfidf, ndims=10) # 1264, 10; Matrix object
+dtm.pca = do.pca(document_term_matrix) # 1264, 1264; Matrix object
+
+dim(dtm.lsa.10)
+dim(dtm)
+    
+```
+
 ## Load Models.  
 #### 3 Top Models: 
 Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf feature set
 ```{r }
 # Load 3 Top Models
-# model1.user = load("usermodel1.rda")
-# model2.user = load("usermodel2.rda")
-# model3.user = load("usermodel3.rda")
-# ```
-# 
-# ## Model 1 Evaluation
-# ```{r }
-# y_predictions = model.predict(document_term_matrix, model1.user)
-# model1.eval   = model.evaluate(y_predictions, y)
-# model1.eval
-# ```
-# 
-# ## Model 2 Evaluation
-# ```{r }
-# y_predictions = model.predict(document_term_matrix, model2.user)
-# model2.eval   = model.evaluate(y_predictions, y)
-# model2.eval
-# 
-# ```
-# 
-# ## Model 3 Evaluation
-# ```{r }
-# y_predictions = model.predict(document_term_matrix, model3.user)
-# model3.eval   = model.evaluate(y_predictions, y)
-# model3.eval
+model1.user = load("usermodel1.rda")
+model2.user = load("usermodel2.rda")
+model3.user = load("usermodel3.rda")
+```
+
+## Model 1 Evaluation
+```{r }
+y_predictions = model.predict(document_term_matrix, model1.user) # this may need to be in as.matrix(document_term_matrix)
+model1.user.eval = model.evaluate(y_predictions, y)
+model1.user.eval
+```
+
+## Model 2 Evaluation
+```{r }
+y_predictions = model.predict(document_term_matrix, model2.user)
+model2.user.eval = model.evaluate(y_predictions, y)
+model2.user.eval
+
+```
+
+## Model 3 Evaluation
+```{r }
+y_predictions = model.predict(document_term_matrix, model3.user)
+model3.user.eval = model.evaluate(y_predictions, y)
+model3.user.eval
 ```
 
 ## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Let's graph results!
