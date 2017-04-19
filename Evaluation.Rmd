@@ -131,17 +131,19 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
-### Load Data
+### Load Data from users and politicians.  
 #### Load Data & Create DTMs  
 ##### Since the 3 top user models feature sets: document_term_matrix, dtm.pca, dtm.lsa.10
 ```{r Load}
 poli.tweets = load.data.politicians()
+user.tweets = load.data.DR()
 
 # Get corpus
 poli.corpus = Corpus(VectorSource(poli.tweets$text))
+user.corpus = Corpus(VectorSource(user.tweets$text))
 
 # Get DTM & y, and TFIDF Dtm & y.tfidf
-document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
+document_term_matrix = DocumentTermMatrix(poli.corpus, control = list(Dictionary=Terms(user.corpus))) # 18 rows, 9137 cols
 y = poli.tweets$party # 18
 
 dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
@@ -159,12 +161,15 @@ Use same types of features in evaluation user dtm.tfiid -> politicians dtm.tfidf
 ```{r }
 # Load 3 Top Models
 model1.user = readRDS("./usermodel1.rds")
+model1.user
 model2.user = readRDS("./usermodel2.rds")
 model3.user = readRDS("./usermodel3.rds")
 ```
 
 ### Model 1 Evaluation
 ```{r }
+set.seed(1)
+# Model feature set is using the 
 y_predictions = model.predict(as.matrix(document_term_matrix), model1.user)
 model1.user.eval = model.evaluate(y_predictions, y)
 model1.user.eval
@@ -173,6 +178,7 @@ model1.user.eval
 
 ### Model 2 Evaluation
 ```{r }
+set.seed(1)
 y_predictions = model.predict(dtm.pca, model2.user)
 model2.user.eval = model.evaluate(y_predictions, y)
 model2.user.eval
@@ -181,10 +187,19 @@ model2.user.eval
 
 ### Model 3 Evaluation
 ```{r }
+set.seed(1)
 y_predictions = model.predict(dtm.lsa.10, model3.user)
 model3.user.eval = model.evaluate(y_predictions, y)
 model3.user.eval
 ```
+
+### Combine Results
+
+```{r }
+eval = cbind(model1.user.eval, model2.user.eval, model3.user.eval)
+eval
+```
+
 
 ## Including Plots
 ### Let's graph results!

@@ -55,12 +55,6 @@ model.fit <- function(X_train, y_train, classifier) {
           model = naiveBayes(x=X_train, y=y_train)
           # y_predictions = predict(model, newdata=X_test)
          },
-        lib = {
-          X_train = as.matrix.csr(X_train)  # 1,244
-          model = LiblineaR(X_train, y_train)
-          X_test2 = as.matrix.csr(X_test)
-          y_predictions = predict(model, newx=X_test2)
-        },
         svmradial = {
           X_train = as.matrix.csr(X_train)  # 1,244
           # X_test  = as.matrix.csr(X_test)    # 622
@@ -222,6 +216,4 @@ saveRDS(model1, "./usermodel1.rds")
 saveRDS(model2, "./usermodel2.rds")
 saveRDS(model3, "./usermodel3.rds")
 ```
-
-
 

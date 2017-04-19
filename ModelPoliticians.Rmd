@@ -34,6 +34,26 @@ load.data.politicians <- function() {
   return(tweets)
 }
 
+load.data.DR <- function() {
+  # preprocessed in python
+  tweets = read.csv('DR_users.csv') # data is preprocessed in python
+  tweets = tweets[,-1]
+  tweets[1:3,]
+  table(tweets$party) # D:881, R:383
+  
+  tweets$text = as.character(tweets$text)
+  tweets$state_code = as.character(tweets$state_code)
+  
+  # Recode Dems = 0, Reps = 1
+  tweets$party = revalue(tweets$party, c("D"=0, "R"=1))
+  any(is.na(tweets$party))
+
+  tweets[1:3,]
+  return(tweets)
+}
+
+
+
 do.lsa <- function(dtm.tfidf, ndims=10) {
   S = svd(dtm.tfidf, nu = ndims, nv = ndims)
   dtm.lsa = S$u
@@ -121,18 +141,23 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
-## Load Data & Create DTMs
-```{r Load}
+## Load Data & Create DTMs --> Need to find intersection between User & Politician Terms
+```{r message=FALSE}
 poli.tweets = load.data.politicians()
+user.tweets = load.data.DR()
 
 # Get corpus
 poli.corpus = Corpus(VectorSource(poli.tweets$text))
+user.corpus = Corpus(VectorSource(user.tweets$text))
 
-# Get DTM & y, and TFIDF Dtm & y.tfidf
-document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
+user.document_term_matrix = DocumentTermMatrix(user.corpus)
+# Get DTM & y, and TFIDF Dtm & y.tfidf using user.corpus as a dictionary 
+## http://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data
+document_term_matrix = DocumentTermMatrix(poli.corpus, control = list(dictionary=Terms(user.document_term_matrix))) 
+# 18 rows, 9137 cols (terms used), (11897 w/user dtm dictionary)
 y = poli.tweets$party # 18
 
-dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
+dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf, dictionary=Terms(user.document_term_matrix))) # no empty rows
 y.tfidf = poli.tweets$party
 
 # Get reduced DTMs
@@ -151,6 +176,7 @@ dim(dtm.pca)
 
 ### Standard Document Term Matrix
 ```{r DTM}
+set.seed(1)
 # Standard Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 dtm.eval.nb = crossValidate(document_term_matrix, y, 'nb')
@@ -163,6 +189,7 @@ kable(dtm.eval.svmlinear)
 
 ### TFIDF Document Term Matrix
 ```{r TFIDF}
+set.seed(1)
 # TFIDF Weighted Document Term Matrix, use y.tfidf
 ### Classifiers - NB, SVMRadial, SVMLinear
 tfidf.eval.nb = crossValidate(dtm.tfidf, y.tfidf, 'nb')
@@ -175,6 +202,7 @@ kable(tfidf.eval.svmlinear)
 
 ### LSA DTM
 ```{r LSA}
+set.seed(1)
 # LSA Document Term Matrix w/10 features, use y.tfidf
 lsa.eval.nb = crossValidate(dtm.lsa.10, y.tfidf, 'nb')
 kable(lsa.eval.nb)
@@ -186,6 +214,7 @@ kable(lsa.eval.svmlinear)
 
 ### PCA DTM
 ```{r PCA}
+set.seed(1)
 # PCA Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 pca.eval.nb = crossValidate(dtm.pca, y, 'nb')
@@ -197,14 +226,13 @@ kable(pca.eval.svmlinear)
 ```
 
 ### Save 3 Top Models
-##### Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)
+##### Top Models:  dtm.eval.svmradial (80.55%), dtm.eval.svmlinear (75.24%), pca.eval.svmlinear (75.24%)
 ```{r }
+set.seed(1)
 # Get models based of of mean F1 score
-dim(document_term_matrix)
-length(y)
 model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
-model2 = model.fit(as.matrix(document_term_matrix), y, 'svmlinear')
-model3 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
+model2 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
+model3 = model.fit(dtm.pca, y, 'svmlinear')
 
 ## Save with 
 saveRDS(model1, "./polimodel1.rds")

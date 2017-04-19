@@ -138,6 +138,26 @@ $(document).ready(function () {
   return(tweets)
 }
 
+load.data.DR &lt;- function() {
+  # preprocessed in python
+  tweets = read.csv('DR_users.csv') # data is preprocessed in python
+  tweets = tweets[,-1]
+  tweets[1:3,]
+  table(tweets$party) # D:881, R:383
+  
+  tweets$text = as.character(tweets$text)
+  tweets$state_code = as.character(tweets$state_code)
+  
+  # Recode Dems = 0, Reps = 1
+  tweets$party = revalue(tweets$party, c(&quot;D&quot;=0, &quot;R&quot;=1))
+  any(is.na(tweets$party))
+
+  tweets[1:3,]
+  return(tweets)
+}
+
+
+
 do.lsa &lt;- function(dtm.tfidf, ndims=10) {
   S = svd(dtm.tfidf, nu = ndims, nv = ndims)
   dtm.lsa = S$u
@@ -223,19 +243,137 @@ crossValidate &lt;- function(document_term_matrix, y, classifier, k.fold=3) {
   return(eval)
 }</code></pre>
 </div>
-<div id="load-data-create-dtms" class="section level2">
-<h2>Load Data &amp; Create DTMs</h2>
+<div id="load-data-create-dtms-need-to-find-intersection-between-user-politician-terms" class="section level2">
+<h2>Load Data &amp; Create DTMs –&gt; Need to find intersection between User &amp; Politician Terms</h2>
 <pre class="r"><code>poli.tweets = load.data.politicians()
+user.tweets = load.data.DR()
 
 # Get corpus
 poli.corpus = Corpus(VectorSource(poli.tweets$text))
+user.corpus = Corpus(VectorSource(user.tweets$text))
 
-# Get DTM &amp; y, and TFIDF Dtm &amp; y.tfidf
-document_term_matrix = DocumentTermMatrix(poli.corpus) # 18 rows, 9137 cols
+user.document_term_matrix = DocumentTermMatrix(user.corpus)
+# Get DTM &amp; y, and TFIDF Dtm &amp; y.tfidf using user.corpus as a dictionary 
+## http://stackoverflow.com/questions/16630627/how-to-recreate-same-documenttermmatrix-with-new-test-data
+document_term_matrix = DocumentTermMatrix(poli.corpus, control = list(dictionary=Terms(user.document_term_matrix))) 
+# 18 rows, 9137 cols (terms used), (11897 w/user dtm dictionary)
 y = poli.tweets$party # 18
 
-dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf)) # no empty rows
-y.tfidf = poli.tweets$party
+dtm.tfidf = DocumentTermMatrix(poli.corpus, control = list(weighting=weightTfIdf, dictionary=Terms(user.document_term_matrix))) # no empty rows</code></pre>
+<pre><code>## Warning in weighting(x): unreferenced term(s): won zones americansjust
+## analysis attributing bankruptcies busin…rt busin…trump casino cells city
+## considers deba…trump decline directed ended english exempt existed fill
+## fundamental gap gore joh listsrt motivation nyc owed pinocchio policies
+## realityrt restore revealed review rhetoric rights sigh somewhat stronger
+## supposert the…rt dietary disease excess innovations i’ve raise risk
+## surpris… transformative weight tallis gouache illustration releasing
+## soon beautiful chatsworth luxurylifestyle… teamlorraineandcarie upstairs
+## window amazingly cousin fujifilm instax mini presentation ranch talented
+## 😄 😄met brilliant hoax nypd strongertogetherrt bag fitnessprofessional
+## impromptu pilates tricks awesome beta chaplain cocospeaks copy dear
+## divine9honored divine9your honored inc overcoming phi serving sorority
+## sosweet speakertiprt write writers zeta zetaphibeta zphib 💕💕 attackhe
+## bond bulliestrump chronically club daily dumptrumplet emmy fbdear
+## forgetting frankly hahahaboomhere humanitarian hurtif iamwithher itthe
+## james lasvegasdebate latest noticed odds picked question… quiet rally
+## reader riggedemmys rude scared schoolyard sinuses snl unable unnecessary
+## updonald upsnifffffffffmy vice violent wind —sneak ’s …sniffffffffffyou
+## 🔥the formed lmaoo 😂 d…breaking gracefully headline hmm kindergartner
+## poised props quit…pence rival threatens type wrongrt ye…rt elusiveness
+## fitness madden can👭🎉✔️ lifelong sporking wonderful arc balances beyond
+## canadians checks dog drops dumbfounding eighth fists flee flop frothing
+## h…rt incoherent joan least listens makedonalddrumpfagainrt masse mirror
+## nooooooooooooooooooooooooooooooo politics rabid rage receipts reflection
+## sneak subtle than…rt that’s til whining defcon wreck activist appealing
+## civil communicator daaamn derrick emotion facebook fastest finding gmo
+## htt…rt infinity jurors kanye liable marathon overpowers photos posed rose
+## science scientific somewhere travel visiting disgusted craziest possibly
+## television australia debateshow century” dose engagement environmental
+## sanity “rules bar bouncer dismissed dive easily flintrt misreading
+## respectfully sort 2016he controlhe controlpence loyal rhnj soldier 2008
+## circulated garb… garb…rt hurtful whose alban earthlings goodnight highlands
+## iceland mars active controls dumb indy minded overrated perry played
+## literallytrump questionrt 2say accesshollywood any1 bcuz begin behavior
+## binder blacklivesmatter boltsbut boltssisterhood chileeeee confirming
+## constant criticizing deaf debateget debatenightbut debatenightchris
+## debatenightconvinced debatenighthillary debatenightsisterhood
+## debatenightsniff debates2016ugh debatewhen defeat denying dirt drank empty
+## failing fightnight fightnightgood fightnightrt guilty handed hip housing
+## hype iamanimmigrant j… kendrick lamar laying leak lets lupita manconvinced
+## manrt miserably…get miserably…trump none note nyong ounce pantsuits
+## pelt preamble presidencyah pulls puts record relations sand shenanigans
+## shimmy shook shoulder sips sleep snatching song strand throwing tone
+## traveling twilight unite vessel whatsoever wig zerodollarsinpaidfedtaxesah
+## zerodollarsinpaidfedtaxesrt “well ease bed hacker sitting slayqueenrt
+## softball 🏆 mad majorly taxed veteran 😡😡😡😡😡😡 dude equally omg 😐ummm agency
+## anyth…rt apology aren choice customs disagrees do…rt dudeshere enforcement
+## grown incorrectly legitimacy ooh privacy questioning actions blames
+## debates2016it devil dull dwells extreme fury future happening longer
+## mate mellaniahillary michelle nasal pictures plants raucous redness rid
+## roast sends soft sprayhe vetting picturesque sunset camp competitive
+## concept expensive freezing global manufacturing scien…rt temps warming
+## focused imma process remain shine focusing hours catholic ave myself
+## nort pennsylvania penny retweeting se… spend at9pm centering issue…rt
+## kcal9 kcal9…rt kudos maddox rubber systematic f…so rapped cooper winner
+## cool haven’t headset hercules i’m moriarty surprising debatesplaying
+## drunkplaying drunkthe mikepence muppets sniffer cambria daisies watercolor
+## bracing debates2016fuck debates2016her debates2016the debates2016vancouver
+## flood hearts lax massexodus massexodusvancouver nbc offer plug pounding
+## psycho refugees terrified billion boy presidentialdebatefighting
+## presidentialdebateok presidentialdebateround presidentialdebatert round
+## sided transaction values bobblehead dubs receive »… 💪🏽 attacked oooh
+## troll wth anime existence realest apologies audiences blows cast clintons
+## disqualified fan followers fought instruct insulting knew kn…rt land laugh
+## magnificent nbc4dc paglia“hillary participator pompous raddazt several
+## teller the…i worms “what anymore calmly dumpty fell forgot pre rants raves
+## snort trumpdy trumptempermenthumpty trumptempermentrt yikes chalkboard
+## cons consent dak einstein equation fucked hasn’t knock of…rt prescott
+## soojung starter tony tweeted backlash clin…haha debates2016bahahahaha
+## grouped horribly inequality …they audits chase clearly companies cutting
+## debatesawesome debatesomg debatesyo examples fashion month months presents
+## raping respectful smh smhtrump thru trumpdumbawesome trumpdumbhe wiser —tim
+## “how basket proudly hempstead hofstra university fear hyperbole loophole”—
+## trickle peddling presidentialdebateintroducing trumpian twist “trump
+## bullying implosion brag composure golive comment farther askaboutabortion
+## contraception counties currently folsomstreetromances matters provider
+## wcd2016rt afterwards aseatatthetable aspirin bald boys discussion jamming
+## kokayii panel cares imwithhertrump trumpisanidiot making cute preferable
+## abcchina abcit admits bgf blah butt debateas debatehrc debatethreatening
+## debateyes debateyou explaining fit generals hillaryclintonadmirals
+## hillaryclintonhackers hillaryclintonno hillaryclintonputin hrctrump
+## hrcyes kick modeling moderatorhrc moderatorputin mrlockerroomtalk
+## natolester natothank north presidentialit presidentiallester
+## rambling trumpedup trumplocker trumpsoftballs trumpsoftballsadmirals
+## trumpsoftballsanswer trumpsoftballschina trumpsoftballshackers
+## trumpsoftballshrc trumpsoftballslove trumpsoftballsstop trumpsoftballsthank
+## trumpsoftballstrump vendetta absol…rt ahora avoid clin…rt contra
+## cuando guerra irak loss moderador olvidó oroginal por posture retado
+## suspended ‘today’ artwork structurebags shape chiming county dean
+## principal principallife principallifenot principallifered velvet warm
+## 694 braggadociousgeez conference contractors mode opportunities soccer
+## carry hurts outright vpde… dammit asian a… corp debatesfun debateshardest
+## debatesthanks excessive eye governator hardest hottest jesus legs salute
+## slashing staff thrilling ultimate according admirals badge blamed coming
+## dress exclusion hahahatrump hairpiece levitating matches militancy
+## racismisrealtrump scarface spent across continent contributors few regions
+## supposed admitted ban behing championed chevychase debatewow d… escaping
+## extremist gym handles hilaryeasy hilaryrt huh humanity hundreds mothe…
+## mothe…rt murders patrol paul revered ryan scapegoating servingrt servingwow
+## stalkerrt tantrums teacher temper trumpisracist trumpsucks withrefugees
+## w…rt debatesholy debateswhy wrestling ideas idiotic imwithhershe prefer
+## regarding schultz sgt sharing dying missouri seeking syrians threatening
+## debates2016does debates2016he debates2016his debates2016why debatesa
+## debateshe debateshis debateskkk debatesuch film greatest huffer inhaling
+## loudly mask moldy oxygen priceless rocks slimy threat trumpdoes 195
+## accountability agenda congrats lecture owes patient people…rt realize
+## redefin…rt year—no snapchat addidassweats harry hello hogsmeade potter…
+## wizarding wwohp wwohphollywood ☺️🤓⚡️ abortions about…rt apologize are…
+## awkwardly behalf charms compliment crisply douglas fred george goldrt
+## graves indiana” interpreters learn leprechaun lucky macarthur mistakes
+## nephew patton pinocchios shady spinning statementrt steve weeping “the
+## clinch debatesif developed garyjohnson idiocracy immature nuked official
+## plastic presidentialdebatehere relationships sad sk</code></pre>
+<pre class="r"><code>y.tfidf = poli.tweets$party
 
 # Get reduced DTMs
 ## PCA and LSA
@@ -260,7 +398,8 @@ dim(dtm.lsa.10)</code></pre>
 </div>
 <div id="standard-document-term-matrix" class="section level3">
 <h3>Standard Document Term Matrix</h3>
-<pre class="r"><code># Standard Document Term Matrix
+<pre class="r"><code>set.seed(1)
+# Standard Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 dtm.eval.nb = crossValidate(document_term_matrix, y, 'nb')
 kable(dtm.eval.nb)</code></pre>
@@ -277,24 +416,24 @@ kable(dtm.eval.nb)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.5000000</td>
-<td align="right">0.7500000</td>
-<td align="right">0.5000000</td>
-<td align="right">0.5833333</td>
+<td align="right">NaN</td>
+<td align="right">0.8333333</td>
+<td align="right">1.0000000</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">0</td>
 <td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
+<td align="right">0.6666667</td>
+<td align="right">0.5555556</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.6666667</td>
-<td align="right">0.8571429</td>
-<td align="right">0.6666667</td>
-<td align="right">0.7301587</td>
+<td align="right">NaN</td>
+<td align="right">0.9090909</td>
+<td align="right">0.8000000</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -313,24 +452,24 @@ kable(dtm.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
+<td align="right">1</td>
+<td align="right">0.75</td>
+<td align="right">0.5000000</td>
 <td align="right">0.7500000</td>
-<td align="right">0.3333333</td>
-<td align="right">1.0000000</td>
-<td align="right">0.6944444</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">1</td>
+<td align="right">0.75</td>
 <td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">0.7500000</td>
 <td align="right">0.9166667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8571429</td>
-<td align="right">0.5000000</td>
-<td align="right">0.8571429</td>
-<td align="right">0.7380952</td>
+<td align="right">1</td>
+<td align="right">0.75</td>
+<td align="right">0.6666667</td>
+<td align="right">0.8055556</td>
 </tr>
 </tbody>
 </table>
@@ -349,31 +488,32 @@ kable(dtm.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.8000000</td>
-<td align="right">0.6666667</td>
+<td align="right">0.3333333</td>
+<td align="right">0.7500000</td>
 <td align="right">1</td>
-<td align="right">0.8222222</td>
+<td align="right">0.6944444</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">1.0000000</td>
+<td align="right">0.5000000</td>
 <td align="right">1.0000000</td>
 <td align="right">1</td>
-<td align="right">1.0000000</td>
+<td align="right">0.8333333</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8888889</td>
-<td align="right">0.8000000</td>
+<td align="right">0.4000000</td>
+<td align="right">0.8571429</td>
 <td align="right">1</td>
-<td align="right">0.8962963</td>
+<td align="right">0.7523810</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="tfidf-document-term-matrix" class="section level3">
 <h3>TFIDF Document Term Matrix</h3>
-<pre class="r"><code># TFIDF Weighted Document Term Matrix, use y.tfidf
+<pre class="r"><code>set.seed(1)
+# TFIDF Weighted Document Term Matrix, use y.tfidf
 ### Classifiers - NB, SVMRadial, SVMLinear
 tfidf.eval.nb = crossValidate(dtm.tfidf, y.tfidf, 'nb')
 kable(tfidf.eval.nb)</code></pre>
@@ -390,24 +530,24 @@ kable(tfidf.eval.nb)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">1.0000000</td>
-<td align="right">NaN</td>
-<td align="right">0.1666667</td>
-<td align="right">NaN</td>
+<td align="right">0.25</td>
+<td align="right">1.00</td>
+<td align="right">0.7500000</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.5000000</td>
-<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">0.60</td>
 <td align="right">1.0000000</td>
-<td align="right">0.5</td>
+<td align="right">0.8666667</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.6666667</td>
-<td align="right">NaN</td>
-<td align="right">0.2857143</td>
-<td align="right">NaN</td>
+<td align="right">0.40</td>
+<td align="right">0.75</td>
+<td align="right">0.8571429</td>
+<td align="right">0.6690476</td>
 </tr>
 </tbody>
 </table>
@@ -426,24 +566,24 @@ kable(tfidf.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.5000000</td>
-<td align="right">0.60</td>
-<td align="right">0.60</td>
-<td align="right">0.5666667</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">0.3333333</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">0</td>
+<td align="right">0</td>
 <td align="right">1.0000000</td>
-<td align="right">1.00</td>
-<td align="right">1.00</td>
-<td align="right">1.0000000</td>
+<td align="right">0.3333333</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.6666667</td>
-<td align="right">0.75</td>
-<td align="right">0.75</td>
-<td align="right">0.7222222</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">0.5000000</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
@@ -463,21 +603,21 @@ kable(tfidf.eval.svmlinear)</code></pre>
 <tr class="odd">
 <td>Precision</td>
 <td align="right">0.3333333</td>
-<td align="right">0.5000000</td>
+<td align="right">1.0000000</td>
 <td align="right">NaN</td>
 <td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
 <td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">0</td>
 <td align="right">0.6666667</td>
+<td align="right">0</td>
+<td align="right">0.5555556</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
 <td align="right">0.5000000</td>
-<td align="right">0.6666667</td>
+<td align="right">0.8000000</td>
 <td align="right">NaN</td>
 <td align="right">NaN</td>
 </tr>
@@ -486,7 +626,8 @@ kable(tfidf.eval.svmlinear)</code></pre>
 </div>
 <div id="lsa-dtm" class="section level3">
 <h3>LSA DTM</h3>
-<pre class="r"><code># LSA Document Term Matrix w/10 features, use y.tfidf
+<pre class="r"><code>set.seed(1)
+# LSA Document Term Matrix w/10 features, use y.tfidf
 lsa.eval.nb = crossValidate(dtm.lsa.10, y.tfidf, 'nb')
 kable(lsa.eval.nb)</code></pre>
 <table>
@@ -502,24 +643,24 @@ kable(lsa.eval.nb)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.6666667</td>
-<td align="right">0.4000000</td>
-<td align="right">0.5000000</td>
-<td align="right">0.5222222</td>
+<td align="right">0.3333333</td>
+<td align="right">1.0000000</td>
+<td align="right">0.60</td>
+<td align="right">0.6444444</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
 <td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
-<td align="right">0.3333333</td>
-<td align="right">0.7777778</td>
+<td align="right">0.4000000</td>
+<td align="right">1.00</td>
+<td align="right">0.8000000</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8000000</td>
+<td align="right">0.5000000</td>
 <td align="right">0.5714286</td>
-<td align="right">0.4000000</td>
-<td align="right">0.5904762</td>
+<td align="right">0.75</td>
+<td align="right">0.6071429</td>
 </tr>
 </tbody>
 </table>
@@ -538,23 +679,23 @@ kable(lsa.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
+<td align="right">0.7500000</td>
 <td align="right">NaN</td>
 <td align="right">0.3333333</td>
-<td align="right">1.0000000</td>
 <td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">1.0000000</td>
 <td align="right">0</td>
 <td align="right">1.0000000</td>
 <td align="right">0.6666667</td>
-<td align="right">0.5555556</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
+<td align="right">0.8571429</td>
 <td align="right">NaN</td>
 <td align="right">0.5000000</td>
-<td align="right">0.8000000</td>
 <td align="right">NaN</td>
 </tr>
 </tbody>
@@ -574,31 +715,32 @@ kable(lsa.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">NaN</td>
-<td align="right">0.5000000</td>
-<td align="right">0.5000000</td>
-<td align="right">NaN</td>
+<td align="right">0.4000000</td>
+<td align="right">1.0000000</td>
+<td align="right">1.0000000</td>
+<td align="right">0.8000000</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0</td>
 <td align="right">1.0000000</td>
 <td align="right">0.6666667</td>
-<td align="right">0.5555556</td>
+<td align="right">0.5000000</td>
+<td align="right">0.7222222</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">NaN</td>
-<td align="right">0.6666667</td>
 <td align="right">0.5714286</td>
-<td align="right">NaN</td>
+<td align="right">0.8000000</td>
+<td align="right">0.6666667</td>
+<td align="right">0.6793651</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="pca-dtm" class="section level3">
 <h3>PCA DTM</h3>
-<pre class="r"><code># PCA Document Term Matrix
+<pre class="r"><code>set.seed(1)
+# PCA Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
 pca.eval.nb = crossValidate(dtm.pca, y, 'nb')
 kable(pca.eval.nb)</code></pre>
@@ -615,24 +757,24 @@ kable(pca.eval.nb)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
+<td align="right">0.3333333</td>
 <td align="right">1.0000000</td>
-<td align="right">0.1666667</td>
-<td align="right">NaN</td>
-<td align="right">NaN</td>
+<td align="right">0.6666667</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">0.6666667</td>
 <td align="right">1.0000000</td>
-<td align="right">0</td>
-<td align="right">0.5555556</td>
+<td align="right">0.2000000</td>
+<td align="right">0.6666667</td>
+<td align="right">0.6222222</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.8000000</td>
-<td align="right">0.2857143</td>
-<td align="right">NaN</td>
-<td align="right">NaN</td>
+<td align="right">0.5000000</td>
+<td align="right">0.3333333</td>
+<td align="right">0.6666667</td>
+<td align="right">0.5000000</td>
 </tr>
 </tbody>
 </table>
@@ -651,23 +793,23 @@ kable(pca.eval.svmradial)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
+<td align="right">1.0000000</td>
 <td align="right">NaN</td>
-<td align="right">0.1666667</td>
-<td align="right">NaN</td>
+<td align="right">0.3333333</td>
 <td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
+<td align="right">0.6666667</td>
 <td align="right">0</td>
 <td align="right">1.0000000</td>
-<td align="right">0</td>
-<td align="right">0.3333333</td>
+<td align="right">0.5555556</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
+<td align="right">0.8000000</td>
 <td align="right">NaN</td>
-<td align="right">0.2857143</td>
-<td align="right">NaN</td>
+<td align="right">0.5000000</td>
 <td align="right">NaN</td>
 </tr>
 </tbody>
@@ -687,40 +829,37 @@ kable(pca.eval.svmlinear)</code></pre>
 <tbody>
 <tr class="odd">
 <td>Precision</td>
-<td align="right">0.60</td>
+<td align="right">0.3333333</td>
+<td align="right">0.7500000</td>
 <td align="right">1</td>
-<td align="right">0.5000000</td>
-<td align="right">0.7000000</td>
+<td align="right">0.6944444</td>
 </tr>
 <tr class="even">
 <td>Recall</td>
-<td align="right">1.00</td>
+<td align="right">0.5000000</td>
+<td align="right">1.0000000</td>
 <td align="right">1</td>
-<td align="right">1.0000000</td>
-<td align="right">1.0000000</td>
+<td align="right">0.8333333</td>
 </tr>
 <tr class="odd">
 <td>F1</td>
-<td align="right">0.75</td>
+<td align="right">0.4000000</td>
+<td align="right">0.8571429</td>
 <td align="right">1</td>
-<td align="right">0.6666667</td>
-<td align="right">0.8055556</td>
+<td align="right">0.7523810</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="save-3-top-models" class="section level3">
 <h3>Save 3 Top Models</h3>
-<div id="top-models-dtm.eval.svmradial-88.57-dtm.eval.svmlinear-85.71-pca.eval.svmlinear-80.95" class="section level5">
-<h5>Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)</h5>
-<pre class="r"><code># Get models based of of mean F1 score
-dim(document_term_matrix)</code></pre>
-<pre><code>## [1]   18 9137</code></pre>
-<pre class="r"><code>length(y)</code></pre>
-<pre><code>## [1] 18</code></pre>
-<pre class="r"><code>model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
-model2 = model.fit(as.matrix(document_term_matrix), y, 'svmlinear')
-model3 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
+<div id="top-models-dtm.eval.svmradial-80.55-dtm.eval.svmlinear-75.24-pca.eval.svmlinear-75.24" class="section level5">
+<h5>Top Models: dtm.eval.svmradial (80.55%), dtm.eval.svmlinear (75.24%), pca.eval.svmlinear (75.24%)</h5>
+<pre class="r"><code>set.seed(1)
+# Get models based of of mean F1 score
+model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
+model2 = model.fit(dtm.pca, y.tfidf, 'svmlinear')
+model3 = model.fit(dtm.pca, y, 'svmlinear')
 
 ## Save with 
 saveRDS(model1, &quot;./polimodel1.rds&quot;)
