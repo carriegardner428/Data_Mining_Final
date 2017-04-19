@@ -2,8 +2,6 @@
 title: "ModelDRs"
 output: html_document
 ---
-
-# Model Domcratic and Republican Twitter Users
 ```{r setup, include=FALSE}
 library(plyr)     # for recoding data
 library(NLP)      # for NLP
@@ -16,7 +14,6 @@ library(Matrix)   # for SVM matricies
 library(SparseM)  # for SVM matricies
 library(caret)    # for Precision, Recall()
 library(knitr)    # for kable
-library(LiblineaR)# for LiblineaR algorithm
 ```
 
 ## Helper Functions

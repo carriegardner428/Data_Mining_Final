@@ -16,7 +16,7 @@ library(caret)    # for Precision, Recall()
 library(knitr)    # for kable
 ```
 
-# Helper Functions
+## Helper Functions
 ```{r Helper}
 load.data.politicians <- function() {
   # preprocessed in python
@@ -54,12 +54,6 @@ model.fit <- function(X_train, y_train, classifier) {
           model = naiveBayes(x=X_train, y=y_train)
           # y_predictions = predict(model, newdata=X_test)
          },
-        lib = {
-          X_train = as.matrix.csr(X_train)  # 1,244
-          model = LiblineaR(X_train, y_train)
-          X_test2 = as.matrix.csr(X_test)
-          y_predictions = predict(model, newx=X_test2)
-        },
         svmradial = {
           X_train = as.matrix.csr(X_train)  # 1,244
           # X_test  = as.matrix.csr(X_test)    # 622
@@ -80,9 +74,6 @@ model.fit <- function(X_train, y_train, classifier) {
 model.predict <- function(X_test, model) {
   # X_test = as.data.frame(X_test)
   y_predictions = predict(model, newdata=X_test)
-  # if probabilties
-  ## probs = predict(model, newdata=X_test)
-  ## y_predictions = as.numeric(probs > .50)
   return(y_predictions)
 }
 
@@ -130,7 +121,7 @@ crossValidate <- function(document_term_matrix, y, classifier, k.fold=3) {
 
 ```
 
-# Load Data & Create DTMs
+## Load Data & Create DTMs
 ```{r Load}
 poli.tweets = load.data.politicians()
 
@@ -153,12 +144,12 @@ dim(dtm.lsa.10)
 dim(dtm.pca)
 ```
 
-# Build Model on Politician's Data
+## Build Model on Politician's Twitter Data
 ## Run Cross Validation
 #### Features: Standard DTM, TFIDF DTM, LSA DTM, and PCA DTM
 #### Classifiers: Naive Bayes, SVM-Radial Kernel, SVM-Linear Kernel
 
-## Standard Document Term Matrix
+### Standard Document Term Matrix
 ```{r DTM}
 # Standard Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
@@ -170,7 +161,7 @@ dtm.eval.svmlinear = crossValidate(document_term_matrix, y, 'svmlinear')
 kable(dtm.eval.svmlinear)
 ```
 
-## TFIDF Document Term Matrix
+### TFIDF Document Term Matrix
 ```{r TFIDF}
 # TFIDF Weighted Document Term Matrix, use y.tfidf
 ### Classifiers - NB, SVMRadial, SVMLinear
@@ -182,7 +173,7 @@ tfidf.eval.svmlinear = crossValidate(dtm.tfidf, y.tfidf, 'svmlinear')
 kable(tfidf.eval.svmlinear)
 ```
 
-## LSA DTM
+### LSA DTM
 ```{r LSA}
 # LSA Document Term Matrix w/10 features, use y.tfidf
 lsa.eval.nb = crossValidate(dtm.lsa.10, y.tfidf, 'nb')
@@ -193,7 +184,7 @@ lsa.eval.svmlinear = crossValidate(dtm.lsa.10, y.tfidf, 'svmlinear')
 kable(lsa.eval.svmlinear)
 ```
 
-## PCA DTM
+### PCA DTM
 ```{r PCA}
 # PCA Document Term Matrix
 ### Classifiers - NB, SVMRadial, SVMLinear
@@ -205,7 +196,7 @@ pca.eval.svmlinear = crossValidate(dtm.pca, y, 'svmlinear')
 kable(pca.eval.svmlinear)
 ```
 
-## Save 3 Top Models
+### Save 3 Top Models
 ##### Top Models: dtm.eval.svmradial (88.57%), dtm.eval.svmlinear (85.71%), pca.eval.svmlinear (80.95%)
 ```{r }
 # Get models based of of mean F1 score
