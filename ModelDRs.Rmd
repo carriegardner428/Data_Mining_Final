@@ -220,11 +220,6 @@ model1 = model.fit(as.matrix(document_term_matrix), y, 'svmradial')
 model2 = model.fit(dtm.pca, y, 'svmradial')
 model3 = model.fit(dtm.lsa.10, y.tfidf, 'svmlinear')
 
-# Save Models as usermodelX.rda
-save(model1, file="usermodel1.rda")
-save(model2, file="usermodel2.rda")
-save(model3, file="usermodel3.rda")
-
 # Save Models as usermodelX.rds
 saveRDS(model1, "./usermodel1.rds")
 saveRDS(model2, "./usermodel2.rds")
